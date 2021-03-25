@@ -5,6 +5,8 @@ from __future__ import print_function
 import numpy as np
 import cv2
 from .ddd_utils import compute_box_3d, project_to_image, draw_box_3d
+import os
+import uuid
 
 class Debugger(object):
   def __init__(self, ipynb=False, theme='black', 
@@ -13,6 +15,10 @@ class Debugger(object):
     if not self.ipynb:
       import matplotlib.pyplot as plt
       self.plt = plt
+
+    self.folder_out = "CenterNetRes"
+    os.makedirs(self.folder_out, exist_ok=True)
+
     self.imgs = {}
     self.theme = theme
     colors = [(color_list[_]).astype(np.uint8) \
@@ -215,10 +221,7 @@ class Debugger(object):
   def show_all_imgs(self, pause=False, time=0):
     if not self.ipynb:
       for i, v in self.imgs.items():
-        cv2.imshow('{}'.format(i), v)
-      if cv2.waitKey(0 if pause else 1) == 27:
-        import sys
-        sys.exit(0)
+        cv2.imwrite(os.path.join(self.folder_out,'{}-{}.png'.format(i, str(uuid.uuid4()))), v)
     else:
       self.ax = None
       nImgs = len(self.imgs)
