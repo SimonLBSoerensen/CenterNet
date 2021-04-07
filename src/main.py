@@ -64,14 +64,15 @@ def main(opt):
       drop_last=True
   )
   
-  csvl = CSVLoggerDL(os.path.join(opt.save_dir, "hist.csv"))
+  csvl_train = CSVLoggerDL(os.path.join(opt.save_dir, "hist_train.csv"))
+  csvl_val = CSVLoggerDL(os.path.join(opt.save_dir, "hist_val.csv"))
 
   print('Starting training...')
   best = 1e10
   for epoch in range(start_epoch + 1, opt.num_epochs + 1):
     mark = epoch if opt.save_all else 'last'
     log_dict_train, _ = trainer.train(epoch, train_loader)
-    csvl.add(log_dict_train)
+    csvl_train.add(log_dict_train)
     logger.write('epoch: {} |'.format(epoch))
     for k, v in log_dict_train.items():
       logger.scalar_summary('train_{}'.format(k), v, epoch)
@@ -81,6 +82,7 @@ def main(opt):
                  epoch, model, optimizer)
       with torch.no_grad():
         log_dict_val, preds = trainer.val(epoch, val_loader)
+        csvl_val.add(log_dict_val, epoch=epoch)
       for k, v in log_dict_val.items():
         logger.scalar_summary('val_{}'.format(k), v, epoch)
         logger.write('{} {:8f} | '.format(k, v))
