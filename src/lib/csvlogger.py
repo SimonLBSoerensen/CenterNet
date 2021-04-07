@@ -1,10 +1,9 @@
 class CSVLoggerDL:
-    def __init__(self, file_out="hist.csv", auto_epochs=True):
+    def __init__(self, file_out="hist.csv", epoch_label="epoch"):
         self.file_out = file_out
         self.header_written = False
-        self.auto_epochs = auto_epochs
         self.epoch = 0
-        self.epoch_name = "epoch"
+        self.epoch_label = epoch_label
 
     def _write_values(self, values, write_mode="a"):
         with open(self.file_out, write_mode) as f:
@@ -12,15 +11,17 @@ class CSVLoggerDL:
                 f.write(f"{v},")
             f.write(f"{values[-1]}\n")
 
-    def add(self, value_dict):
-        if self.auto_epochs and self.epoch_name not in value_dict:
-            value_dict[self.epoch_name] = self.epoch
+    def add(self, value_dict, epoch=None):
+        if epoch is None and self.epoch_label not in value_dict:
+            value_dict[self.epoch_label] = self.epoch
             self.epoch += 1
+        elif epoch:
+            value_dict[self.epoch_label] = epoch
 
         if not self.header_written:
-            if self.epoch_name in value_dict:
-                self.header = [self.epoch_name]
-                self.header += [el for el in list(value_dict.keys()) if el != self.epoch_name]
+            if self.epoch_label in value_dict:
+                self.header = [self.epoch_label]
+                self.header += [el for el in list(value_dict.keys()) if el != self.epoch_label]
             else:
                 self.header = list(value_dict.keys())
 
@@ -32,4 +33,3 @@ class CSVLoggerDL:
             value = value_dict[h] if h in value_dict else ""
             values.append(value)
         self._write_values(values=values, write_mode="a")
- 
