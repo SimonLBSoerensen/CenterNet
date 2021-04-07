@@ -12,6 +12,7 @@ from opts import opts
 from models.model import create_model, load_model, save_model
 from models.data_parallel import DataParallel
 from logger import Logger
+from csvlogger import CSVLoggerDL
 from datasets.dataset_factory import get_dataset
 from trains.train_factory import train_factory
 
@@ -62,12 +63,15 @@ def main(opt):
       pin_memory=True,
       drop_last=True
   )
+  
+  csvl = CSVLoggerDL(os.path.join(opt.save_dir, "hist.csv"))
 
   print('Starting training...')
   best = 1e10
   for epoch in range(start_epoch + 1, opt.num_epochs + 1):
     mark = epoch if opt.save_all else 'last'
     log_dict_train, _ = trainer.train(epoch, train_loader)
+    csvl.add(log_dict_train)
     logger.write('epoch: {} |'.format(epoch))
     for k, v in log_dict_train.items():
       logger.scalar_summary('train_{}'.format(k), v, epoch)
